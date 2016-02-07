@@ -1,3 +1,21 @@
 Experimental character encoding inspired by UTF-8.
 Designed to be more compact for monolingual texts (think Wikipedia articles in national languages etc.) than UTF-8 itself.
 Like UTF-8, it is backward-compatible with ASCII.
+
+a quick comparison:
+
+file                                                              wc -m    wc -c     wc -c     ∆        wc -c       wc -c        ∆
+                                                                           (utf-8)   (utf-p)            (utf-8.xz)  (utf-p.xz)
+--------------------------------------------------------------------------------------------------------------------------------------
+UTF-8-demo.txt                                                    7627     14058     10483    -3575     5412        5132        -280
+www.columbia.edu-~fdc-utf8-index.html                             52554    59219     55823    -3396     23452       23176       -276
+ar:استيلاء_الحوثيين_على_السلطة                                    402840   591774    479566   -112208   132508      128704      -3804
+el:Κατάλογος_ποδοσφαιρικών_ομάδων_Ελλάδας                         327083   553302    403060   -150242   46276       42380       -3896
+en:List_of_law_clerks_of_the_Supreme_Court_of_the_United_States   802361   802392    802401    9        55992       55992        0
+es:Alsacia_en_1789                                                905967   920849    935063    14214    181392      182040       648
+he:אליפות_אירופה_בשחמט_2015                                       257226   261711    259072   -2639     65608       65536       -72
+ja:アンパンマンの登場人物一覧                                     301708   780918    605887   -175031   168744      167344      -1400
+ru:Левковские                                                     423182   695691    522478   -173213   160320      154192      -6128
+th:รายชื่อตัวละครในวันพีซ                                              530370   1474454   569850   -904604   183152      165828      -17324
+vi:Friedrich_II_của_Phổ                                           415971   487281    504498    17217    128600      129252       652
+zh:霹靂布袋戲人物列表                                             190996   506612    480025   -26587    184260      191344       7084
