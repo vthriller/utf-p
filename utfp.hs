@@ -4,10 +4,14 @@ import qualified Codec.Binary.UTF8.String as U
 import Data.Bits
 import Data.Char (ord, chr)
 import Data.Word
+import System.Environment (getArgs)
 
 main = do
 	input <- B.getContents
-	B.putStr . B.pack . (map fromIntegral) . (encode 0 0 0) . (map ord) . U.decode . B.unpack $ input
+	args <- getArgs
+	if "-d" `elem` args
+	then B.putStr . B.pack . U.encode . (map $ chr . fromIntegral) . (decode 0 0 0) . (map fromIntegral :: [Word8] -> [Word64]) . B.unpack $ input
+	else B.putStr . B.pack . (map fromIntegral) . (encode 0 0 0) . (map ord) . U.decode . B.unpack $ input
 
 {-
 '0xxx xxxx' to represent '(p2)(p1)(p0)xxx xxxx' char
@@ -34,3 +38,20 @@ encode pp0 pp1 pp2 (c:cs) =
 		p2' = p2 .|. 0b11100000
 		b = c .&. 0b1111111
 encode _ _ _ [] = []
+
+decode :: (Eq a, Num a, Bits a) => a -> a -> a -> [a] -> [a]
+decode p0 p1 p2 (c:cs)
+	| c .&. 0b10000000 == 0b00000000 =
+		(c .|. p') : decode p0 p1 p2 cs
+	| c .&. 0b11000000 == 0b10000000 =
+		decode (c .&. 0b00111111) p1 p2 cs
+	| c .&. 0b11100000 == 0b11000000 =
+		decode p0 (c .&. 0b00011111) p2 cs
+	| c .&. 0b11100000 == 0b11100000 =
+		decode p0 p1 (c .&. 0b00011111) cs
+	where
+		p0' = p0 `shift` 7
+		p1' = p1 `shift` (7+6)
+		p2' = p2 `shift` (7+6+5)
+		p' = p0' .|. p1' .|. p2'
+decode _ _ _ [] = []
