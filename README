@@ -1,0 +1,3 @@
+Experimental character encoding inspired by UTF-8.
+Designed to be more compact for monolingual texts (think Wikipedia articles in national languages etc.) than UTF-8 itself.
+Like UTF-8, it is backward-compatible with ASCII.
