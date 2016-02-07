@@ -2,7 +2,9 @@ Experimental character encoding inspired by UTF-8.
 Designed to be more compact for monolingual texts (think Wikipedia articles in national languages etc.) than UTF-8 itself.
 Like UTF-8, it is backward-compatible with ASCII.
 
-a quick comparison:
+
+A quick comparison
+------------------
 
 file                                    wc -m    wc -c     wc -c     ∆        wc -c       wc -c        ∆
                                                  (utf-8)   (utf-p)            (utf-8.xz)  (utf-p.xz)
@@ -19,3 +21,58 @@ wikipedia-longest/ru:*                  423182   695691    522478   -173213   16
 wikipedia-longest/th:*                  530370   1474454   569850   -904604   183152      165828      -17324
 wikipedia-longest/vi:*                  415971   487281    504498    17217    128600      129252       652
 wikipedia-longest/zh:*                  190996   506612    480025   -26587    184260      191344       7084
+
+
+Quick start
+-----------
+
+ $ cabal sandbox init
+ $ cabal install --only-dependencies
+ $ cabal build
+
+Now you can convert from UTF-P to UTF-8:
+
+ $ xzcat texts/UTF-8-demo.txt.utfp.xz | ./dist/build/utf-p/utf-p -d
+
+…and vice versa:
+
+ $ curl http://news.baidu.com/ | iconv -f gb2312 -t utf-8//IGNORE | ./dist/build/utf-p/utf-p
+
+
+Note on prefix-free common symbols
+----------------------------------
+
+An attempt was made to use '00xx xxxx' to always represent characters from the first half of ASCII, because it contains commonly (and frequently) used symbols such as whitespace, digits and puntuation marks.
+However, this is not a good idea, and it is so for a couple of reasons.
+
+ * It actually makes prefix switches more frequent, because only a set of just 2⁶ = 64 symbols can be represented without changing a prefix bits, with only '01xx xxxx' bytes.
+   Here's a prefix usage statistics for some non-latin languages:
+
+    $ st6() { cut -d/ -f1 | tr -d \\n | python -c 'import sys; from collections import *; print(Counter(ord(i)>>6 for i in sys.stdin.read()))'; }
+    $ st7() { cut -d/ -f1 | tr -d \\n | python -c 'import sys; from collections import *; print(Counter(ord(i)>>7 for i in sys.stdin.read()))'; }
+
+    $ aspell -l el dump master | st6
+    Counter({14: 2804010, 15: 1538518})
+    $ aspell -l el dump master | st7
+    Counter({7: 4342528})
+
+    $ aspell -l ru dump master | st6
+    Counter({16: 1745940, 17: 895764})
+    $ aspell -l ru dump master | st7
+    Counter({8: 2641704})
+
+   Stats may vary greatly for different latin-based languages as well:
+
+    $ aspell -l es dump master | st6
+    Counter({1: 408450, 3: 10399})
+    $ aspell -l es dump master | st7
+    Counter({0: 408450, 1: 10399})
+
+    $ aspell -l vi dump master | st6
+    Counter({1: 16622, 123: 2157, 3: 1959, 122: 1504, 4: 426, 6: 391, 5: 45})
+    $ aspell -l vi dump master | st7
+    Counter({0: 16622, 61: 3661, 1: 1959, 2: 471, 3: 391})
+
+   The amount of prefixes needed to represent typical japanese text is left as an exercise for the reader.
+
+ * Reduction of prefix-setter appearance makes garbled texts less readable. For instance, for reading process started somewhere at the middle of text, the actual content can be recovered much quicker because of prefix switches that normally occur around whitespace and punctuation characters.
