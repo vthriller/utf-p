@@ -6,6 +6,7 @@ import Data.Char (ord, chr)
 import Data.Word
 import System.Environment (getArgs)
 
+main :: IO ()
 main = do
 	input <- B.getContents
 	args <- getArgs
@@ -39,7 +40,7 @@ encode pp0 pp1 pp2 (c:cs) =
 		b = c .&. 0b1111111
 encode _ _ _ [] = []
 
-decode :: (Eq a, Num a, Bits a) => a -> a -> a -> [a] -> [a]
+decode :: (Eq a, Num a, Bits a, Show a) => a -> a -> a -> [a] -> [a]
 decode p0 p1 p2 (c:cs)
 	| c .&. 0b10000000 == 0b00000000 =
 		(c .|. p') : decode p0 p1 p2 cs
@@ -49,6 +50,8 @@ decode p0 p1 p2 (c:cs)
 		decode p0 (c .&. 0b00011111) p2 cs
 	| c .&. 0b11100000 == 0b11100000 =
 		decode p0 p1 (c .&. 0b00011111) cs
+	-- non-exhaustive matches, y'say?
+	| otherwise = error $ "Impossible byte: " ++ (show c)
 	where
 		p0' = p0 `shift` 7
 		p1' = p1 `shift` (7+6)
